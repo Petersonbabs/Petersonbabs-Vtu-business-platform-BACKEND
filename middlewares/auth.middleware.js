@@ -1,6 +1,6 @@
 import blacklistedTokens from "../models/blacklistTokens.model.js";
 import jwt from 'jsonwebtoken';
-import users from "../models/user.js";
+import users from "../models/user.model.js";
 
 export const isAuthenticated = async (req, res, next) => {
     let token;

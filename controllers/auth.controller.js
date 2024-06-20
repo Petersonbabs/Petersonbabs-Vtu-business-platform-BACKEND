@@ -1,4 +1,4 @@
-import users from "../models/user.js"
+import users from "../models/user.model.js"
 import generateToken from "../utils/generateToken.utils.js"
 import genVerificationToken from '../utils/randomString.utils.js'
 import { sendVerificationEmail } from "../services/mail/sendVerificationEmail.js"
@@ -64,25 +64,6 @@ export const signUp = async (req, res, next) => {
 
 }
 
-export const regoster = async (req, res, next) => {
-    
-    try {
-        const user = await users.create(req.body)
-        if(!user){
-            res.status(404).json({
-                message: "Unable to create user"
-            })
-        }
-
-        res.status(201).json({
-            message: 'succes',
-            user
-        })
-    } catch (error) {
-        console.log(error);
-        next(error)
-    }
-}
 
 
 // Login user
@@ -100,13 +81,13 @@ export const login = async (req, res, next) => {
             return
         }
 
-        const user = await users.findOne({ email }).select('+password') //|| await users.findOne({ userName })
+        const user = await users.findOne({ email }).select('+password') || await users.findOne({ userName }).select('+password')
 
 
         if (!user) {
             res.status(403).json({
                 status: 'error',
-                message: 'This user was not found.'
+                message: 'Oops! You supplied incorrect details.'
             })
             return
         }
@@ -117,7 +98,7 @@ export const login = async (req, res, next) => {
         if (!correctPassword || !user) {
             res.status(401).json({
                 status: 'error',
-                message: 'Email or password incorrect.'
+                message: 'Oops! You supplied incorrect details.'
             })
             return
         }

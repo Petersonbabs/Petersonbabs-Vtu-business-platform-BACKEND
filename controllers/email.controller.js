@@ -1,4 +1,4 @@
-import users from "../models/user.js";
+import users from "../models/user.model.js";
 import genVerificationToken from '../utils/randomString.utils.js';
 
 

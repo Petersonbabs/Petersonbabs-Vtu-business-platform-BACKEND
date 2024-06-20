@@ -20,9 +20,15 @@ const handleDuplicateValueError = (err) => {
 
 const handleValidationErrorDB = (err) => {
     // Extract error messages from the validation error
+    let message
     const errValue = Object.values(err.errors).map(error => error.value);
     const errKey = Object.values(err.errors).map(error => error.path)
-    const message = `${errValue} is an invalid ${errKey}`
+    const errKind = Object.values(err.errors).map(error => error.kind)
+    if (errKind == 'required') {
+        message = `Please provide a ${errKey}`
+    } else {
+        message = `${errValue} is an invalid ${errKey}`
+    }
     const error = new Error(message);
     error.statusCode = 400;
     return error
@@ -76,7 +82,7 @@ const sendProdError = (err, res) => {
 
     // Duplicate Value Error
     if (err.code == 11000) {
-        
+
         const error = handleDuplicateValueError(err);
         res.status(error.statusCode).json({
             status: "error",
