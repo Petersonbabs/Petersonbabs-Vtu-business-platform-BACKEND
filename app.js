@@ -15,6 +15,9 @@ app.use(morgan('dev'));
 
 
 // ENDPOINTS
+app.get('/', (req, res)=> {
+    res.send('Welcome to Nobyll Vtu Platform')
+})
 app.get('/api/v1/', (req, res)=> {
     res.send('Welcome to Nobyll Api version 1')
 })
