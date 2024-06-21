@@ -12,7 +12,7 @@ const handleDuplicateValueError = (err) => {
     const dupKey = Object.keys(err.keyValue)[0];
     const dupValue = Object.values(err.keyValue)[0];
 
-    const message = `The ${dupKey} "${dupValue}"  exist already`;
+    const message = `This ${dupKey}: "${dupValue}" already exists`;
     const error = new Error(message);
     error.statusCode = 400;
     return error

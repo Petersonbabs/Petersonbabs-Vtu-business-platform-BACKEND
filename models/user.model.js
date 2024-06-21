@@ -5,7 +5,7 @@ import bcrypt from 'bcryptjs'
 const userSchema = new mongoose.Schema({
     fullName: {
         type: String,
-        required: [true, 'Please provide your full name'],
+        // required: [true, 'Please provide your full name'],
     },
 
     email: {
@@ -29,6 +29,10 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: [true, 'Please provide a password'],
         select: false
+    },
+
+    profilePic: {
+        type: String
     },
 
     isVerified: {

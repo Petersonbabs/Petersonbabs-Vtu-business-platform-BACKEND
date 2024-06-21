@@ -8,10 +8,10 @@ import blacklistedTokens from "../models/blacklistTokens.model.js";
 
 // Register user
 export const signUp = async (req, res, next) => {
-    const { fullName, userName, email, password, confirmPassword, phoneNumber } = req.body
+    const {  userName, email, password, confirmPassword} = req.body
     try {
 
-        if (!fullName || !userName || !email || !password || !confirmPassword || !phoneNumber) {
+        if (!userName || !email || !password || !confirmPassword ) {
             res.status(400).json({
                 status: 'error',
                 message: 'Please complete the form'
@@ -28,7 +28,7 @@ export const signUp = async (req, res, next) => {
 
 
         // TODO: generate random profile picture
-        const profilePic = `https://ui-avatars.com/api/?background=020024&color=fff&name=${userName}`
+        const profilePic = `https://ui-avatars.com/api/?background=4ade80&color=fff&name=${userName}`
         const verificationToken = genVerificationToken(32)
         const verificationExpiration = Date.now() + 360000
 

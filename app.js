@@ -17,7 +17,7 @@ const corsOptions = {
 };
 app.use(cors(corsOptions));
 app.use(morgan('dev'));
-
+ 
 
 // ENDPOINTS
 app.get('/', (req, res)=> {
