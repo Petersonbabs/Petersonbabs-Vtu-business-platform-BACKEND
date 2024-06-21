@@ -6,7 +6,7 @@ import changeEmail from '../services/mail/changeEmail.js'
 import { requestVerification, verifyNewEmail, verifyUser } from '../controllers/email.controller.js'
 const router = express.Router()
 
-router.route('/signup').post(signUp)
+router.route('/signup').post(signUp) // DONE
 router.route('/login').post(login) // login user router
 router.route('/logout').post(isAuthenticated, logout) // logout user router
 router.route('/change-password').patch(isAuthenticated, changePassword)
