@@ -31,6 +31,15 @@ const userSchema = new mongoose.Schema({
         select: false
     },
 
+    passwordToken: {
+        type: String,
+    },
+
+    passwordTokenExp: {
+        type: String,
+    },
+
+
     profilePic: {
         type: String
     },

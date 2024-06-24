@@ -8,10 +8,10 @@ import blacklistedTokens from "../models/blacklistTokens.model.js";
 
 // Register user
 export const signUp = async (req, res, next) => {
-    const {  userName, email, password, confirmPassword} = req.body
+    const { userName, email, password, confirmPassword } = req.body
     try {
 
-        if (!userName || !email || !password || !confirmPassword ) {
+        if (!userName || !email || !password || !confirmPassword) {
             res.status(400).json({
                 status: 'error',
                 message: 'Please complete the form'
@@ -81,10 +81,12 @@ export const login = async (req, res, next) => {
             return
         }
 
-        const user = await users.findOne({ email }).select('+password') || await users.findOne({ userName }).select('+password')
+        const user = await users.findOne({ email }).select('+password')
+
 
 
         if (!user) {
+            console.log('not available');
             res.status(403).json({
                 status: 'error',
                 message: 'Oops! You supplied incorrect details.'
@@ -109,7 +111,7 @@ export const login = async (req, res, next) => {
         const token = generateToken(email, user._id);
 
         res.status(200).json({
-            status: 'succes',
+            status: 'success',
             message: 'Login successful. Redirecting...',
             user,
             token
@@ -120,6 +122,7 @@ export const login = async (req, res, next) => {
         next(error)
     }
 }
+
 
 // Update Profile
 export const updateProfile = async (req, res, next) => {
@@ -175,6 +178,7 @@ export const deleteAccount = async (req, res, next) => {
 // Logout user
 export const logout = async (req, res, next) => {
     const { token } = req.body;
+    console.log(token);
     try {
         if (!token) {
             return res.status(400).json({
@@ -282,8 +286,8 @@ export const verifyNewEmail = async (req, res, next) => {
 
         const updatedEmail = user.newEmail
 
-        await users.findByIdAndUpdate(user._id, { newEmailVerified: true, verificationExpiration: null, verificationToken: null,  email: updatedEmail})
-       
+        await users.findByIdAndUpdate(user._id, { newEmailVerified: true, verificationExpiration: null, verificationToken: null, email: updatedEmail })
+
 
         res.status(200).json({
             status: 'success',
@@ -293,8 +297,64 @@ export const verifyNewEmail = async (req, res, next) => {
     } catch (error) {
         next(error);
     }
-} 
+}
 
+
+// FOROT PASSWORD
+export const forgotPassword = async (req, res, next) => {
+    const { email } = req.body
+    try {
+        const user = await users.findOne({ email });
+        const passwordToken = genVerificationToken()
+        const passwordTokenExp = Date.now() + 3600 * 1000
+
+        if (!user) {
+            console.log('not available');
+            res.status(403).json({
+                status: 'error',
+                message: 'No user with the email was found.'
+            })
+            return
+        }
+        await users.findByIdAndUpdate(user._id, { passwordToken, passwordTokenExp })
+        req.user = user
+        console.log(user);
+        next(passwordToken)
+
+    } catch (error) {
+        console.log(`Error occured at forgot password: ${error}`);
+        next(error)
+    }
+}
+
+export const invalidateLink = async (req, res, next) => {
+    const { passwordToken } = req.body
+    try {
+
+        const user = await users.findOne({ passwordToken, passwordTokenExp: { $gt: Date.now() } });
+
+        if (!user) {
+
+            res.status(400).json({
+                status: 'error',
+                message: 'The rest link is invalid or expired. Try requesting a new one.'
+            })
+
+            res.status(200).json({
+                status: 200,
+                message: 'Verification successful. Redirecting...',
+                user
+            })
+
+        }
+
+        await users.findByIdAndUpdate(user._id, { passwordToken: null, passwordTokenExp: null })
+
+    } catch (error) {
+        next(error)
+        console.log(error);
+    }
+}
 
 // CHANGE PASSWORD => forgot password
 export const changePassword = async (req, res, next) => {

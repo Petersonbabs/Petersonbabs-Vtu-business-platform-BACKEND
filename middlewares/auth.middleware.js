@@ -4,6 +4,7 @@ import users from "../models/user.model.js";
 
 export const isAuthenticated = async (req, res, next) => {
     let token;
+    
     if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
         token = req.headers.authorization.split(' ')[1]
     }
@@ -16,8 +17,9 @@ export const isAuthenticated = async (req, res, next) => {
         return
     }
 
+    
     const blacklistedToken = await blacklistedTokens.findOne({ token });
-
+    
     if (blacklistedToken) {
         res.status(401).json({
             status: "fail",
@@ -25,8 +27,9 @@ export const isAuthenticated = async (req, res, next) => {
         })
         return
     }
-
-    const decoded = jwt.verify(token, process.env.JWT_SECRET)
+    
+    const decoded = await jwt.verify(token, process.env.JWT_SECRET)
+    
     const user = await users.findById(decoded.id)
 
     if (!user) {

@@ -6,6 +6,7 @@ import genVerificationToken from '../utils/randomString.utils.js';
 // Verify New signup
 export const verifyUser = async (req, res, next) => {
     const { token } = req.params
+    
     try {
         const user = await users.findOne({ verificationToken: token, verificationExpiration: { $gt: Date.now() } });
 
@@ -15,16 +16,19 @@ export const verifyUser = async (req, res, next) => {
 
             res.status(400).json({
                 status: 'error',
-                message: 'Oops! It looks like your verification link has expired or used. Request for another one.'
+                message: 'Oops! This link has either expired or has been used.',
+                action: 'Request verification'
             })
+            return
 
         }
 
         await users.findByIdAndUpdate(user._id, { isVerified: true, verificationExpiration: null, verificationToken: null })
 
         res.status(200).json({
-            status: 200,
-            message: 'Verification successful. Redirecting...',
+            status: 'success',
+            message: 'Verification successful!',
+            action: 'Go to dashboard',
             user
         })
 
@@ -50,6 +54,7 @@ export const requestVerification = async (req, res, next) => {
             message: 'Oops! Something is off with your email. Try again.'
         })
         return
+        
     } else if (user.isVerified) {
         res.status(400).json({
             status: 'warning',

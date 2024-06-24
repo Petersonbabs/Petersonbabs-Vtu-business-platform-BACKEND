@@ -1,6 +1,7 @@
 import transporter from "./transporter.nodemailer.js";
 
 export const sendVerificationEmail = async (userName, email, verificationToken) => {
+    console.log('sending email..');
     const verificationOptions = {
         from: 'NoByll',
         subject: 'Verify Your Email - NoByll',
