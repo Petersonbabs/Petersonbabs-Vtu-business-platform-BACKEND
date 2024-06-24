@@ -115,7 +115,7 @@ const sendProdError = (err, res) => {
             message: error.message,
         })
     }
-    else if (err.message === "Invalid token supplied. Please login again") {
+    else if (err.name === "TokenExpiredError") {
         const error = handleJWTExpiredError(err);
         res.status(error.statusCode).json({
             status: "error",
@@ -138,6 +138,8 @@ const sendProdError = (err, res) => {
             message: error.message,
         })
     }
+
+    
 
     else {
         res.status(500).json({
