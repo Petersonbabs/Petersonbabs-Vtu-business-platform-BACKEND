@@ -1,7 +1,7 @@
 import express from 'express'
 import { changePassword, deleteAccount, login, logout, signUp, updateProfile, forgotPassword, checkLink, resetPassword } from '../controllers/auth.controller.js'
 import { sendRequestedVerification } from '../services/mail/requestVerification.js'
-import { isAuthenticated } from '../middlewares/auth.middleware.js'
+import { isAuthenticated, verifyToken } from '../middlewares/auth.middleware.js'
 import changeEmail from '../services/mail/changeEmail.js'
 import { requestVerification, verifyNewEmail, verifyUser } from '../controllers/email.controller.js'
 import { sendForgotPasswordEmail } from '../services/mail/forgotPasswordEmail.js'
@@ -13,6 +13,26 @@ router.route('/forgot-password').post(forgotPassword, sendForgotPasswordEmail)
 router.route('/check-link').post(checkLink)
 router.route('/reset-password').patch(resetPassword)
 router.route('/logout').post(isAuthenticated, logout) // logout user router
+router.route('verify-token').post(async (req, res) => {
+    const { token } = req.body
+    try {
+        const verifiedUser = await verifyToken(token);
+        if (!verifiedUser) {
+            res.status(401).json({
+                status: "fail",
+                message: "Invalid token. Please login again.",
+                action: 'Login'
+            })
+            return
+        }
+
+        res.status(200).json({
+            user: verifiedUser
+        })
+    } catch (error) {
+        console.log(error)
+    }
+})
 
 router.route('/change-password').patch(isAuthenticated, changePassword)
 

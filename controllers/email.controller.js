@@ -41,9 +41,10 @@ export const verifyUser = async (req, res, next) => {
 // Request verification
 export const requestVerification = async (req, res, next) => {
     const { email } = req.body;
+    
     const user = await users.findOne({ email })
 
-    const verificationToken = genVerificationToken()
+    const verificationToken = genVerificationToken(10)
     const verificationExpiration = Date.now() + 3600 * 1000
 
 

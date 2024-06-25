@@ -30,7 +30,7 @@ export const signUp = async (req, res, next) => {
         // TODO: generate random profile picture
         const profilePic = `https://ui-avatars.com/api/?background=4ade80&color=fff&name=${userName}`
         const verificationToken = genVerificationToken(32)
-        const verificationExpiration = Date.now() + 360000
+        const verificationExpiration = Date.now() + 360000 * 10
 
         const user = await users.create({ profilePic, verificationToken, verificationExpiration, ...req.body })
 
@@ -215,18 +215,21 @@ export const verifyUser = async (req, res, next) => {
 
         // check is the provided token hasn't expired yet
         if (!user) {
-
             res.status(400).json({
-                status: 'error',
-                message: 'Oops! It looks like your verification link has expired or used. Request for another one.'
+                status: 'invalid link',
+                title: 'Invalid',
+                message: 'This link is invalid or expired. Try requesting a new one.',
+                action: 'signin'
             })
-
+            return
         }
 
         await users.findByIdAndUpdate(user._id, { isVerified: true, verificationExpiration: null, verificationToken: null })
 
         res.status(200).json({
             status: 200,
+            title: "Success",
+            action: 'Go to Dashboard',
             message: 'Verification successful. Redirecting...',
             user
         })
@@ -234,68 +237,6 @@ export const verifyUser = async (req, res, next) => {
     } catch (error) {
         console.log('Error at verifyUser Middleware ' + error)
         next(error)
-    }
-}
-
-// REQUEST VERIFICATION
-export const requestVerification = async (req, res, next) => {
-    const { email } = req.body;
-    const user = await users.findOne({ email })
-
-    const verificationToken = genVerificationToken()
-    const verificationExpiration = Date.now() + 3600 * 1000
-
-
-
-    if (!user) {
-        res.status(403).json({
-            status: 'error',
-            message: 'Oops! Something is off with your email. Try again.'
-        })
-        return
-    } else if (user.isVerified) {
-        res.status(400).json({
-            status: 'warning',
-            message: 'This account has already been verified.'
-        })
-        return
-    }
-    req.user = user
-    await users.findByIdAndUpdate(user._id, { verificationToken, verificationExpiration })
-    next(verificationToken)
-
-}
-
-
-export const verifyNewEmail = async (req, res, next) => {
-
-    const { token } = req.params
-
-    try {
-        const user = await users.findOne({ verificationToken: token, verificationExpiration: { $gt: Date.now() } });
-
-        // check is the provided token hasn't expired yet
-        if (!user) {
-
-            res.status(400).json({
-                status: 'error',
-                message: 'Oops! It looks like your verification link has expired or used. Try again.'
-            })
-
-        }
-
-        const updatedEmail = user.newEmail
-
-        await users.findByIdAndUpdate(user._id, { newEmailVerified: true, verificationExpiration: null, verificationToken: null, email: updatedEmail })
-
-
-        res.status(200).json({
-            status: 'success',
-            message: 'Email changed successfully',
-            user
-        });
-    } catch (error) {
-        next(error);
     }
 }
 
@@ -346,7 +287,6 @@ export const checkLink = async (req, res, next) => {
             return
         }
 
-        // await users.findByIdAndUpdate(user._id, { passwordToken: null, passwordTokenExp: null })
 
         res.status(200).json({
             status: 'success',
