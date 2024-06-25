@@ -305,8 +305,6 @@ export const forgotPassword = async (req, res, next) => {
     const { email } = req.body
     try {
         const user = await users.findOne({ email });
-        const passwordToken = genVerificationToken()
-        const passwordTokenExp = Date.now() + 3600 * 1000
 
         if (!user) {
             console.log('not available');
@@ -316,9 +314,14 @@ export const forgotPassword = async (req, res, next) => {
             })
             return
         }
+
+        const passwordToken = genVerificationToken(10)
+        const passwordTokenExp = Date.now() + 3600 * 1000
+
         await users.findByIdAndUpdate(user._id, { passwordToken, passwordTokenExp })
+
         req.user = user
-        console.log(user);
+
         next(passwordToken)
 
     } catch (error) {
@@ -327,7 +330,8 @@ export const forgotPassword = async (req, res, next) => {
     }
 }
 
-export const invalidateLink = async (req, res, next) => {
+// 
+export const checkLink = async (req, res, next) => {
     const { passwordToken } = req.body
     try {
 
@@ -336,23 +340,63 @@ export const invalidateLink = async (req, res, next) => {
         if (!user) {
 
             res.status(400).json({
-                status: 'error',
-                message: 'The rest link is invalid or expired. Try requesting a new one.'
+                status: 'invalid link',
+                message: 'This link is invalid or expired. Try requesting a new one.'
             })
-
-            res.status(200).json({
-                status: 200,
-                message: 'Verification successful. Redirecting...',
-                user
-            })
-
+            return
         }
 
-        await users.findByIdAndUpdate(user._id, { passwordToken: null, passwordTokenExp: null })
+        // await users.findByIdAndUpdate(user._id, { passwordToken: null, passwordTokenExp: null })
+
+        res.status(200).json({
+            status: 'success',
+            message: 'Link invalidated'
+        })
 
     } catch (error) {
         next(error)
         console.log(error);
+    }
+}
+
+export const resetPassword = async (req, res, next) => {
+    const { newPassword, confirmPassword, passwordToken } = req.body
+    if (!newPassword || !confirmPassword) {
+        res.status(400).json({
+            message: 'Complete the form please.'
+        })
+        return
+    }
+
+    if (newPassword !== confirmPassword) {
+        res.status(400).json({
+            message: 'Passwords do not match.'
+        })
+        return
+    }
+
+    try {
+        const user = await users.findOne({ passwordToken, passwordTokenExp: { $gt: Date.now() } });
+
+        if (!user) {
+
+            res.status(400).json({
+                status: 'invalid link',
+                message: 'This link is invalid or expired. Try requesting a new one.'
+            })
+            return
+        }
+        const hashedPassword = await bcrypt.hash(newPassword, 12);
+
+        await users.findByIdAndUpdate(user._id, { password: hashedPassword })
+        res.status(200).json({
+            status: 'success',
+            message: 'Your password has been updated.'
+        })
+
+    } catch (error) {
+        console.log(error)
+        next(error)
     }
 }
 

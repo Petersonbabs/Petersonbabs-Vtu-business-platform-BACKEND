@@ -1,8 +1,7 @@
 import transporter from "./transporter.nodemailer.js";
 
-export const sendForgotPasswordEmail = async ({passwordToken}, req, res, next) => {
-
-    console.log(req.user);
+export const sendForgotPasswordEmail = async (passwordToken,req, res, next) => {
+    
     const {email, userName} = req.user
     
 

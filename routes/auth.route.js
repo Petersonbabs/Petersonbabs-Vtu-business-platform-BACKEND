@@ -1,5 +1,5 @@
 import express from 'express'
-import { changePassword, deleteAccount, login, logout, signUp, updateProfile, forgotPassword } from '../controllers/auth.controller.js'
+import { changePassword, deleteAccount, login, logout, signUp, updateProfile, forgotPassword, checkLink, resetPassword } from '../controllers/auth.controller.js'
 import { sendRequestedVerification } from '../services/mail/requestVerification.js'
 import { isAuthenticated } from '../middlewares/auth.middleware.js'
 import changeEmail from '../services/mail/changeEmail.js'
@@ -10,7 +10,10 @@ const router = express.Router()
 router.route('/signup').post(signUp) // DONE
 router.route('/login').post(login) // login user router
 router.route('/forgot-password').post(forgotPassword, sendForgotPasswordEmail)
+router.route('/check-link').post(checkLink)
+router.route('/reset-password').patch(resetPassword)
 router.route('/logout').post(isAuthenticated, logout) // logout user router
+
 router.route('/change-password').patch(isAuthenticated, changePassword)
 
 router.route('/delete-account').delete(isAuthenticated, deleteAccount);
